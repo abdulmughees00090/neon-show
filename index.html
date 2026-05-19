@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <title>Neon Dream</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,6 +12,7 @@
       overflow: hidden;
       background: #000;
       cursor: none;
+      font-family: 'Georgia', serif;
     }
 
     canvas {
@@ -22,36 +23,85 @@
       z-index: 0;
     }
 
-    /* ── Secret text — fixed dead-centre, never moves ── */
-    #secret {
+    /* ── Wandering sentence ── */
+    .wandering-sentence {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Arial Black', Arial, sans-serif;
+      font-family: 'Georgia', serif;
       font-weight: 900;
-      font-size: clamp(2.2rem, 5.5vw, 5rem);
-      color: transparent;           /* invisible by default */
+      font-size: clamp(1.1rem, 2.8vw, 2.2rem);
+      color: #000;
       white-space: nowrap;
-      letter-spacing: 0.03em;
-      transition: color 0.18s ease;
+      letter-spacing: 0.04em;
       z-index: 10;
       user-select: none;
-      pointer-events: none;         /* JS does hit-testing — no CSS hover */
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      text-shadow: none;
+      transform: translate(-50%, -50%);
     }
-    #secret.revealed {
-      color: #000;                  /* solid black, sits over neon */
+    .wandering-sentence.alive {
+      opacity: 1;
+    }
+    .wandering-sentence.revealed {
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.9),
+        0 0 20px rgba(255,255,255,0.6),
+        0 0 40px rgba(180,220,255,0.4);
+    }
+
+    /* ── Payment entity ── */
+    #pay-entity {
+      position: fixed;
+      font-family: 'Georgia', serif;
+      font-size: clamp(0.85rem, 2vw, 1.15rem);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #000;
+      z-index: 12;
+      user-select: none;
+      cursor: none;
+      padding: 12px 28px;
+      border: 1px solid #000;
+      border-radius: 40px;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.5s ease, border-color 0.3s, color 0.3s, box-shadow 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #pay-entity.alive {
+      opacity: 1;
+      pointer-events: auto;
+      cursor: none;
+    }
+    #pay-entity.revealed {
+      color: rgba(255,255,255,0.9);
+      border-color: rgba(180,220,255,0.6);
+      box-shadow:
+        0 0 12px rgba(0,200,255,0.4),
+        0 0 30px rgba(0,200,255,0.2),
+        inset 0 0 12px rgba(0,200,255,0.05);
+    }
+    #pay-entity.pay-pulse {
+      animation: payPulse 0.6s ease;
+    }
+    @keyframes payPulse {
+      0%   { box-shadow: 0 0 12px rgba(0,200,255,0.4), 0 0 30px rgba(0,200,255,0.2); }
+      50%  { box-shadow: 0 0 30px rgba(0,200,255,0.9), 0 0 70px rgba(0,200,255,0.5), 0 0 100px rgba(200,100,255,0.3); }
+      100% { box-shadow: 0 0 12px rgba(0,200,255,0.4), 0 0 30px rgba(0,200,255,0.2); }
     }
 
     /* ── Custom cursor dot ── */
     #cursor-dot {
       position: fixed;
-      width: 8px; height: 8px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: #fff;
       pointer-events: none;
       transform: translate(-50%, -50%);
-      z-index: 20;
+      z-index: 30;
       box-shadow: 0 0 6px 2px rgba(255,255,255,0.8);
       transition: background 0.3s, box-shadow 0.3s;
     }
@@ -60,302 +110,438 @@
     #tutorial {
       position: fixed;
       inset: 0;
-      background: rgba(5,5,5,0.92);
+      background: rgba(3,3,3,0.94);
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: tutFadeIn 0.8s ease forwards;
+      animation: tutFadeIn 1.2s ease forwards;
     }
     #tutorial.hiding {
-      animation: tutFadeOut 0.8s ease forwards;
+      animation: tutFadeOut 1s ease forwards;
       pointer-events: none;
     }
     @keyframes tutFadeIn  { from { opacity:0 } to { opacity:1 } }
     @keyframes tutFadeOut { from { opacity:1 } to { opacity:0 } }
 
     .tut-inner {
-      max-width: 520px;
-      width: 90%;
+      max-width: 480px;
+      width: 88%;
       text-align: center;
-      padding: 48px 44px 52px;
-      border-radius: 20px;
-      background: rgba(10,10,10,0.7);
-      backdrop-filter: blur(12px);
+      padding: 52px 44px 56px;
+      border-radius: 4px;
+      background: rgba(6,6,6,0.85);
+      backdrop-filter: blur(20px);
       position: relative;
       overflow: hidden;
     }
     .tut-inner::before {
       content: '';
       position: absolute;
-      inset: -2px;
-      border-radius: 22px;
-      background: conic-gradient(from 0deg, #ff00cc, #00ffee, #fffc00, #ff6600, #ff00cc);
+      inset: -1px;
+      border-radius: 5px;
+      background: conic-gradient(from 0deg, #ff00cc, #00ffee, #ffe566, #ff6600, #cc00ff, #ff00cc);
       z-index: -1;
-      animation: spinBorder 4s linear infinite;
-      opacity: 0.55;
+      animation: spinBorder 6s linear infinite;
+      opacity: 0.5;
     }
     .tut-inner::after {
       content: '';
       position: absolute;
       inset: 1px;
-      border-radius: 19px;
-      background: rgba(4,4,4,0.95);
+      border-radius: 4px;
+      background: rgba(4,4,4,0.97);
       z-index: -1;
     }
     @keyframes spinBorder { to { transform: rotate(360deg); } }
 
-    .tut-icon {
-      font-size: 3.2rem;
-      margin-bottom: 20px;
+    .tut-glyph {
+      font-size: 2rem;
+      margin-bottom: 28px;
       display: block;
-      animation: pulse 2.4s ease-in-out infinite;
+      color: rgba(255,255,255,0.15);
+      letter-spacing: 0.6em;
+      animation: glyphFade 3s ease-in-out infinite;
     }
-    @keyframes pulse {
-      0%,100% { transform: scale(1);    filter: drop-shadow(0 0 8px #fff);  }
-      50%      { transform: scale(1.12); filter: drop-shadow(0 0 20px #0ff); }
-    }
-
-    .tut-title {
-      font-family: 'Georgia', serif;
-      font-size: clamp(1.5rem, 4vw, 2.1rem);
-      font-weight: 900;
-      margin-bottom: 14px;
-      background: linear-gradient(90deg, #ff00cc, #00ffee, #fffc00);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    @keyframes glyphFade {
+      0%,100% { opacity: 0.15; }
+      50%      { opacity: 0.55; }
     }
 
-    .tut-steps {
-      list-style: none;
-      margin: 22px 0 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .tut-steps li {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      color: rgba(255,255,255,0.78);
+    .tut-line1 {
       font-family: 'Georgia', serif;
-      font-size: 1rem;
-      text-align: left;
-      line-height: 1.5;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      font-weight: 400;
+      font-style: italic;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 10px;
+      line-height: 1.7;
     }
-    .step-num {
-      flex-shrink: 0;
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #ff00cc, #00d4ff);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.78rem;
-      font-weight: 900;
-      color: #000;
-      box-shadow: 0 0 12px rgba(0,212,255,0.5);
+    .tut-line2 {
+      font-family: 'Georgia', serif;
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      color: rgba(255,255,255,0.28);
+      margin-bottom: 44px;
+      letter-spacing: 0.1em;
     }
 
     .tut-btn {
       background: transparent;
-      border: 1.5px solid rgba(255,255,255,0.25);
-      color: #fff;
-      padding: 14px 44px;
-      border-radius: 50px;
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.55);
+      padding: 14px 48px;
+      border-radius: 40px;
       font-family: 'Georgia', serif;
-      font-size: 1rem;
-      letter-spacing: 0.1em;
+      font-size: 0.9rem;
+      letter-spacing: 0.2em;
       cursor: none;
       position: relative;
       overflow: hidden;
-      transition: border-color 0.3s, box-shadow 0.3s;
+      transition: border-color 0.4s, color 0.4s, box-shadow 0.4s;
     }
-    .tut-btn::before {
+    .tut-btn:hover {
+      border-color: rgba(0,255,238,0.5);
+      color: rgba(255,255,255,0.85);
+      box-shadow: 0 0 20px rgba(0,255,238,0.15);
+    }
+
+    /* ── Paddle overlay ── */
+    #pay-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      animation: tutFadeIn 0.5s ease forwards;
+    }
+    #pay-overlay.open { display: flex; }
+    .pay-modal {
+      max-width: 400px;
+      width: 88%;
+      background: rgba(5,5,5,0.97);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+      padding: 48px 44px 52px;
+      text-align: center;
+      position: relative;
+    }
+    .pay-modal::before {
       content: '';
       position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, #ff00cc44, #00ffee44);
-      opacity: 0;
-      transition: opacity 0.3s;
+      inset: -1px;
+      border-radius: 5px;
+      background: conic-gradient(from 0deg, #0ff, #f0f, #ff0, #0ff);
+      z-index: -1;
+      animation: spinBorder 8s linear infinite;
+      opacity: 0.3;
     }
-    .tut-btn:hover::before { opacity: 1; }
-    .tut-btn:hover {
-      border-color: rgba(0,255,238,0.6);
-      box-shadow: 0 0 24px rgba(0,255,238,0.25);
+    .pay-modal::after {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: 4px;
+      background: rgba(4,4,4,0.98);
+      z-index: -1;
+    }
+    .pay-title {
+      font-family: 'Georgia', serif;
+      font-size: 1.3rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 12px;
+    }
+    .pay-sub {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.12em;
+      margin-bottom: 36px;
+      line-height: 1.8;
+    }
+    .pay-amounts {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .pay-amount-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.55);
+      padding: 10px 22px;
+      border-radius: 40px;
+      font-family: 'Georgia', serif;
+      font-size: 0.9rem;
+      cursor: none;
+      transition: all 0.3s;
+      letter-spacing: 0.05em;
+    }
+    .pay-amount-btn:hover, .pay-amount-btn.active {
+      border-color: rgba(0,200,255,0.6);
+      color: #fff;
+      box-shadow: 0 0 16px rgba(0,200,255,0.2);
+    }
+    .pay-confirm-btn {
+      background: transparent;
+      border: 1px solid rgba(0,200,255,0.4);
+      color: rgba(255,255,255,0.7);
+      padding: 14px 52px;
+      border-radius: 40px;
+      font-family: 'Georgia', serif;
+      font-size: 0.88rem;
+      letter-spacing: 0.18em;
+      cursor: none;
+      width: 100%;
+      transition: all 0.4s;
+      margin-bottom: 20px;
+    }
+    .pay-confirm-btn:hover {
+      border-color: rgba(0,200,255,0.8);
+      box-shadow: 0 0 24px rgba(0,200,255,0.25);
+      color: #fff;
+    }
+    .pay-close {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.15);
+      letter-spacing: 0.15em;
+      cursor: none;
+      background: none;
+      border: none;
+      transition: color 0.3s;
+    }
+    .pay-close:hover { color: rgba(255,255,255,0.4); }
+
+    /* ── Mute button ── */
+    #mute-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 50;
+      background: none;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.2);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      padding: 8px 16px;
+      border-radius: 40px;
+      cursor: none;
+      transition: all 0.3s;
+    }
+    #mute-btn:hover {
+      border-color: rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ── Session timer glyph ── */
+    #session-glyph {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 50;
+      color: rgba(255,255,255,0.04);
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      font-family: 'Georgia', serif;
+      pointer-events: none;
+      transition: color 2s ease;
     }
   </style>
 </head>
 <body>
 
 <canvas id="c"></canvas>
-<div id="secret">Abdul Haadi Isn't Sleeping</div>
 <div id="cursor-dot"></div>
+<div id="session-glyph">◈</div>
+<button id="mute-btn">♪ MUTE</button>
 
+<!-- Tutorial -->
 <div id="tutorial">
   <div class="tut-inner">
-    <span class="tut-icon">✦</span>
-    <div class="tut-title">Welcome to Neon Dream</div>
-    <ul class="tut-steps">
-      <li>
-        <span class="step-num">1</span>
-        <span>Move your mouse freely — neon lights chase your cursor with glowing tails.</span>
-      </li>
-      <li>
-        <span class="step-num">2</span>
-        <span>Each light has a shifting random color, painting the darkness alive.</span>
-      </li>
-      <li>
-        <span class="step-num">3</span>
-        <span>A hidden message waits in the centre of the screen — move your cursor there to reveal it.</span>
-      </li>
-    </ul>
-    <button class="tut-btn" id="tut-enter">Enter the Dream →</button>
+    <span class="tut-glyph">· · ·</span>
+    <div class="tut-line1">Nothing is hidden.<br>You simply haven't<br>revealed it yet.</div>
+    <div class="tut-line2">move slowly — the dream reacts</div>
+    <button class="tut-btn" id="tut-enter">enter</button>
+  </div>
+</div>
+
+<!-- Payment overlay -->
+<div id="pay-overlay">
+  <div class="pay-modal">
+    <div class="pay-title" id="pay-modal-title">Keep It Alive</div>
+    <div class="pay-sub">Something kept you here.<br>Leave a trace of light.</div>
+    <div class="pay-amounts">
+      <button class="pay-amount-btn active" data-amount="1">$1</button>
+      <button class="pay-amount-btn" data-amount="3">$3</button>
+      <button class="pay-amount-btn" data-amount="5">$5</button>
+    </div>
+    <button class="pay-confirm-btn" id="pay-confirm">Continue the Signal →</button>
+    <button class="pay-close" id="pay-close">dissolve back</button>
   </div>
 </div>
 
 <script>
 (function () {
+  'use strict';
 
-  /* ── Tutorial ── */
-  const STORAGE_KEY = 'neonDream_tutSeen_v2';
+  /* ═══════════════════════════════════
+     TUTORIAL
+  ═══════════════════════════════════ */
+  const STORAGE_KEY = 'neonDream_v3';
   const tutEl  = document.getElementById('tutorial');
   const tutBtn = document.getElementById('tut-enter');
 
   function hideTutorial() {
     tutEl.classList.add('hiding');
-    setTimeout(() => { tutEl.style.display = 'none'; }, 850);
+    setTimeout(() => { tutEl.style.display = 'none'; startAudio(); }, 1000);
     try { localStorage.setItem(STORAGE_KEY, '1'); } catch(_){}
   }
   tutBtn.addEventListener('click', hideTutorial);
-  try { if (localStorage.getItem(STORAGE_KEY)) hideTutorial(); } catch(_){}
+  try { if (localStorage.getItem(STORAGE_KEY)) { setTimeout(hideTutorial, 400); } } catch(_){}
 
-  /* ── Canvas ── */
+  /* ═══════════════════════════════════
+     CANVAS
+  ═══════════════════════════════════ */
   const canvas = document.getElementById('c');
   const ctx    = canvas.getContext('2d');
   let W, H;
-  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
   resize();
   window.addEventListener('resize', resize);
 
-  /* ── Mouse tracking ── */
+  /* ═══════════════════════════════════
+     POINTER TRACKING
+  ═══════════════════════════════════ */
   let mx = W / 2, my = H / 2;
+  let pmx = mx, pmy = my;
+  let pointerSpeed = 0;
   const cursorDot = document.getElementById('cursor-dot');
 
-  window.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
+  function onPointerMove(cx, cy) {
+    pmx = mx; pmy = my;
+    mx = cx; my = cy;
+    pointerSpeed = Math.hypot(mx - pmx, my - pmy);
     cursorDot.style.left = mx + 'px';
     cursorDot.style.top  = my + 'px';
-    checkReveal();
-  });
-  window.addEventListener('touchmove', e => {
-    const t = e.touches[0];
-    mx = t.clientX; my = t.clientY;
-    checkReveal();
-  }, { passive: true });
-
-  /* ── Secret text hit-test ── */
-  const secret = document.getElementById('secret');
-
-  function checkReveal() {
-    const r = secret.getBoundingClientRect();
-    const inside = mx >= r.left && mx <= r.right && my >= r.top && my <= r.bottom;
-    secret.classList.toggle('revealed', inside);
   }
 
-  /* ── Orbs ── */
-  const TRAIL_LEN    = 45;
-  const N_PARTICLES  = 7;
-  const SPAWN_SPREAD = 180;
+  window.addEventListener('mousemove', e => onPointerMove(e.clientX, e.clientY));
+  window.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    onPointerMove(t.clientX, t.clientY);
+  }, { passive: false });
+  window.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    onPointerMove(t.clientX, t.clientY);
+  }, { passive: true });
+
+  /* ═══════════════════════════════════
+     SESSION DURATION
+  ═══════════════════════════════════ */
+  const sessionStart = Date.now();
+  function sessionMinutes() { return (Date.now() - sessionStart) / 60000; }
+  // Intensity 0–1 that ramps over 10 minutes
+  function sessionIntensity() { return Math.min(1, sessionMinutes() / 10); }
+
+  /* ═══════════════════════════════════
+     ORB SYSTEM
+  ═══════════════════════════════════ */
+  const TRAIL_LEN   = 52;
+  const N_ORBS      = 8;
+  const SPAWN_SPREAD = 200;
 
   function randHue() { return Math.random() * 360; }
 
   class Orb {
     constructor() { this.reset(true); }
-
     reset(first = false) {
       this.x = first ? Math.random() * W : mx + (Math.random() - 0.5) * SPAWN_SPREAD;
       this.y = first ? Math.random() * H : my + (Math.random() - 0.5) * SPAWN_SPREAD;
       this.hue         = randHue();
-      this.hueSpeed    = (Math.random() - 0.5) * 1.2;
-      this.size        = 3 + Math.random() * 5;
-      this.speed       = 0.032 + Math.random() * 0.045;
+      this.hueSpeed    = (Math.random() - 0.5) * 1.4;
+      this.size        = 3 + Math.random() * 6;
+      this.speed       = 0.028 + Math.random() * 0.042;
       this.wander      = Math.random() * Math.PI * 2;
-      this.wanderSpeed = (Math.random() - 0.5) * 0.09;
-      this.wanderAmp   = 60 + Math.random() * 120;
+      this.wanderSpeed = (Math.random() - 0.5) * 0.08;
+      this.wanderAmp   = 70 + Math.random() * 140;
       this.trail = [];
       for (let i = 0; i < TRAIL_LEN; i++) this.trail.push({ x: this.x, y: this.y });
     }
-
-    update() {
+    update(energyBoost) {
       this.wander += this.wanderSpeed;
-      const tx = mx + Math.cos(this.wander)        * this.wanderAmp * 0.5;
-      const ty = my + Math.sin(this.wander * 1.3)  * this.wanderAmp * 0.4;
-      this.x += (tx - this.x) * this.speed;
-      this.y += (ty - this.y) * this.speed;
+      const amp = this.wanderAmp * (1 + energyBoost * 1.4);
+      const tx = mx + Math.cos(this.wander)       * amp * 0.5;
+      const ty = my + Math.sin(this.wander * 1.3) * amp * 0.4;
+      const spd = this.speed * (1 + energyBoost * 0.8);
+      this.x += (tx - this.x) * spd;
+      this.y += (ty - this.y) * spd;
       this.hue = (this.hue + this.hueSpeed + 360) % 360;
       this.trail.unshift({ x: this.x, y: this.y });
       if (this.trail.length > TRAIL_LEN) this.trail.pop();
     }
-
-    draw() {
-      const h = this.hue;
-
-      /* tail */
+    draw(energyBoost) {
+      const h    = this.hue;
+      const blur = 18 + energyBoost * 24;
       for (let i = 1; i < this.trail.length; i++) {
         const t   = (this.trail.length - i) / this.trail.length;
         const seg = this.trail[i];
         ctx.save();
         ctx.beginPath();
         ctx.arc(seg.x, seg.y, Math.max(0.1, this.size * t * 0.9), 0, Math.PI * 2);
-        ctx.fillStyle   = `hsla(${h},100%,60%,${t * t * 0.85})`;
+        ctx.fillStyle   = `hsla(${h},100%,60%,${t * t * 0.9})`;
         ctx.shadowColor = `hsl(${h},100%,55%)`;
-        ctx.shadowBlur  = 18 * t;
+        ctx.shadowBlur  = blur * t;
         ctx.fill();
         ctx.restore();
       }
-
-      /* head glow */
-      const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3.5);
+      const r = this.size * (3.5 + energyBoost * 2);
+      const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r);
       g.addColorStop(0,   `hsla(${h},100%,90%,1)`);
       g.addColorStop(0.3, `hsla(${h},100%,60%,0.7)`);
       g.addColorStop(1,   `hsla(${h},100%,50%,0)`);
       ctx.save();
       ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size * 3.5, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
       ctx.fillStyle   = g;
       ctx.shadowColor = `hsl(${h},100%,60%)`;
-      ctx.shadowBlur  = 30;
+      ctx.shadowBlur  = 30 + energyBoost * 40;
       ctx.fill();
       ctx.restore();
-
-      /* white core */
       ctx.save();
       ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size * 0.55, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y, this.size * 0.5, 0, Math.PI * 2);
       ctx.fillStyle   = '#fff';
       ctx.shadowColor = '#fff';
-      ctx.shadowBlur  = 12;
+      ctx.shadowBlur  = 14;
       ctx.fill();
       ctx.restore();
     }
   }
 
-  const orbs = Array.from({ length: N_PARTICLES }, () => new Orb());
+  const orbs = Array.from({ length: N_ORBS }, () => new Orb() );
 
-  /* ── Ambient sparkles ── */
-  const sparkles = Array.from({ length: 55 }, () => ({
+  /* ═══════════════════════════════════
+     SPARKLES
+  ═══════════════════════════════════ */
+  const sparkles = Array.from({ length: 60 }, () => ({
     x:     Math.random() * 1920,
     y:     Math.random() * 1080,
     hue:   randHue(),
-    alpha: Math.random() * 0.35 + 0.05,
-    speed: (Math.random() - 0.5) * 0.008,
-    r:     0.5 + Math.random() * 1.5,
+    alpha: Math.random() * 0.3 + 0.03,
+    speed: (Math.random() - 0.5) * 0.007,
+    r:     0.5 + Math.random() * 1.6,
   }));
 
   function drawSparkles() {
     for (const s of sparkles) {
       s.alpha += s.speed;
-      if (s.alpha <= 0.02 || s.alpha >= 0.4) s.speed *= -1;
+      if (s.alpha <= 0.02 || s.alpha >= 0.38) s.speed *= -1;
       ctx.save();
       ctx.globalAlpha = s.alpha;
       ctx.beginPath();
@@ -368,7 +554,504 @@
     }
   }
 
-  /* ── Cursor dot colour ── */
+  /* ═══════════════════════════════════
+     DISSOLUTION PARTICLES
+  ═══════════════════════════════════ */
+  const dissParticles = [];
+
+  function spawnDissolution(x, y, text, hue) {
+    const count = 30 + Math.floor(text.length * 1.2);
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const spd   = 0.3 + Math.random() * 1.4;
+      dissParticles.push({
+        x, y,
+        vx: Math.cos(angle) * spd,
+        vy: Math.sin(angle) * spd - 0.5,
+        alpha: 0.8 + Math.random() * 0.2,
+        r: 1 + Math.random() * 2.5,
+        hue: hue + (Math.random() - 0.5) * 40,
+        life: 1,
+        decay: 0.012 + Math.random() * 0.018,
+      });
+    }
+  }
+
+  function updateDrawDiss() {
+    for (let i = dissParticles.length - 1; i >= 0; i--) {
+      const p = dissParticles[i];
+      p.x    += p.vx;
+      p.y    += p.vy;
+      p.vy   += 0.015;
+      p.life -= p.decay;
+      if (p.life <= 0) { dissParticles.splice(i, 1); continue; }
+      ctx.save();
+      ctx.globalAlpha = p.life * p.alpha;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+      ctx.fillStyle   = `hsl(${p.hue},100%,75%)`;
+      ctx.shadowColor = `hsl(${p.hue},100%,60%)`;
+      ctx.shadowBlur  = 6;
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  /* ═══════════════════════════════════
+     REVEAL HIT-TEST (canvas-space pixel check)
+  ═══════════════════════════════════ */
+  // We check if cursor is within a padded box around the element
+  function isRevealedByPointer(el) {
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    const pad = 60;
+    return mx >= r.left - pad && mx <= r.right + pad &&
+           my >= r.top  - pad && my <= r.bottom + pad;
+  }
+
+  /* ═══════════════════════════════════
+     SENTENCE POOL
+  ═══════════════════════════════════ */
+  const SENTENCES_BASE = [
+    "You stayed longer than most.",
+    "Something kept you here.",
+    "You came for nothing and stayed.",
+    "Nobody knows you are here.",
+    "You almost ignored this.",
+    "You hover like you care.",
+    "Most people already left.",
+    "You are still searching.",
+    "You found this at the right time.",
+    "This was made for someone like you.",
+    "The darkness remembers movement.",
+    "Some things exist only to be found.",
+    "You returned to the beginning.",
+    "Every light here is borrowed.",
+    "Silence is also a kind of signal.",
+  ];
+
+  const SENTENCES_DEEP = [
+    "You would have paid if this were entertainment.",
+    "A stranger already kept this alive.",
+    "This website remembers hesitation.",
+    "You are the reason the lights are still on.",
+    "Some people leave before they understand.",
+    "You have been here long enough to know.",
+    "The dream only exists because you stayed.",
+    "Nobody will know you were here unless you leave something.",
+    "This light costs someone something.",
+    "You came back. That means something.",
+    "You are the last one watching.",
+    "Staying is a form of care.",
+  ];
+
+  function getSentencePool() {
+    const intensity = sessionIntensity();
+    if (intensity < 0.2) return SENTENCES_BASE;
+    if (intensity < 0.6) return [...SENTENCES_BASE, ...SENTENCES_DEEP.slice(0, 4)];
+    return [...SENTENCES_BASE, ...SENTENCES_DEEP];
+  }
+
+  function randomSentence(exclude) {
+    const pool = getSentencePool().filter(s => s !== exclude);
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  /* ═══════════════════════════════════
+     WANDERING SENTENCE SYSTEM
+  ═══════════════════════════════════ */
+  let activeSentence = null;
+  let nextSentenceTimer = null;
+  let revealProgress  = 0;
+  let sentenceHue     = 180;
+
+  function createSentenceEl(text) {
+    const el = document.createElement('div');
+    el.className = 'wandering-sentence';
+    el.textContent = text;
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function spawnSentence() {
+    const margin = 120;
+    const text = randomSentence(activeSentence ? activeSentence.text : null);
+    sentenceHue = randHue();
+
+    const el = createSentenceEl(text);
+    // Initial position: random but not near edges
+    const x = margin + Math.random() * (W - margin * 2);
+    const y = margin + Math.random() * (H - margin * 2);
+
+    const obj = {
+      el, text,
+      x, y,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.22,
+      hue: sentenceHue,
+      phase: 'entering',   // entering | alive | dissolving
+      revealAcc: 0,
+      born: Date.now(),
+    };
+
+    // Fade in
+    requestAnimationFrame(() => {
+      el.style.left = x + 'px';
+      el.style.top  = y + 'px';
+      el.classList.add('alive');
+    });
+
+    activeSentence = obj;
+    revealProgress = 0;
+  }
+
+  function updateSentence() {
+    if (!activeSentence) return;
+    const s = activeSentence;
+
+    // Gentle drift
+    s.x += s.vx;
+    s.y += s.vy;
+    s.vx += (Math.random() - 0.5) * 0.012;
+    s.vy += (Math.random() - 0.5) * 0.008;
+    // Dampen
+    s.vx *= 0.992;
+    s.vy *= 0.992;
+    // Soft boundary bounce
+    const m = 80;
+    if (s.x < m)     s.vx += 0.04;
+    if (s.x > W - m) s.vx -= 0.04;
+    if (s.y < m)     s.vy += 0.04;
+    if (s.y > H - m) s.vy -= 0.04;
+
+    s.el.style.left = s.x + 'px';
+    s.el.style.top  = s.y + 'px';
+
+    // Reveal check
+    const revealed = isRevealedByPointer(s.el);
+    s.el.classList.toggle('revealed', revealed);
+
+    if (revealed) {
+      s.revealAcc += 0.012;
+      if (s.revealAcc >= 1 && s.phase === 'alive') {
+        s.phase = 'dissolving';
+        dissolveSentence(s);
+      }
+    } else {
+      s.revealAcc = Math.max(0, s.revealAcc - 0.003);
+    }
+
+    // Lifetime — dissolve even without full reveal after ~40s
+    const age = (Date.now() - s.born) / 1000;
+    if (age > 40 && s.phase === 'alive') {
+      s.phase = 'dissolving';
+      dissolveSentence(s);
+    }
+  }
+
+  function dissolveSentence(s) {
+    const r = s.el.getBoundingClientRect();
+    const cx = r.left + r.width  / 2;
+    const cy = r.top  + r.height / 2;
+    spawnDissolution(cx, cy, s.text, s.hue);
+    s.el.style.transition = 'opacity 1.2s ease';
+    s.el.style.opacity = '0';
+    setTimeout(() => {
+      s.el.remove();
+      activeSentence = null;
+      // Spawn next after a pause
+      const delay = 3000 + Math.random() * 4000;
+      nextSentenceTimer = setTimeout(spawnSentence, delay);
+    }, 1300);
+  }
+
+  // Kick off
+  setTimeout(spawnSentence, 5000);
+
+  /* ═══════════════════════════════════
+     PAYMENT ENTITY
+  ═══════════════════════════════════ */
+  const PAY_TEXTS = [
+    "Keep It Alive",
+    "Leave A Trace",
+    "Feed The Lights",
+    "Continue The Signal",
+    "Stay A Little Longer",
+    "Keep The Dream Breathing",
+    "Add Another Thought",
+    "The Lights Remember",
+    "Keep This Existing",
+    "Someone Already Did",
+    "Leave Something Behind",
+    "You Could Have Done More",
+  ];
+
+  const payEl = document.getElementById('pay-entity') || (() => {
+    const el = document.createElement('div');
+    el.id = 'pay-entity';
+    document.body.appendChild(el);
+    return el;
+  })();
+
+  // Create the element if it doesn't exist from HTML
+  const payEntityEl = document.createElement('div');
+  payEntityEl.id = 'pay-entity-dyn';
+  payEntityEl.style.cssText = `
+    position: fixed;
+    font-family: 'Georgia', serif;
+    font-size: clamp(0.7rem, 1.8vw, 1rem);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #000;
+    z-index: 12;
+    user-select: none;
+    padding: 11px 26px;
+    border: 1px solid #000;
+    border-radius: 40px;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.6s ease, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    cursor: none;
+  `;
+  document.body.appendChild(payEntityEl);
+
+  const payState = {
+    x: W * 0.7,
+    y: H * 0.4,
+    vx: (Math.random() - 0.5) * 0.2,
+    vy: (Math.random() - 0.5) * 0.15,
+    alive: false,
+    revealed: false,
+    textIdx: Math.floor(Math.random() * PAY_TEXTS.length),
+  };
+
+  function updatePayText() {
+    payState.textIdx = (payState.textIdx + 1) % PAY_TEXTS.length;
+    payEntityEl.textContent = PAY_TEXTS[payState.textIdx];
+  }
+  payEntityEl.textContent = PAY_TEXTS[payState.textIdx];
+
+  // Show payment entity after 30s
+  setTimeout(() => {
+    payState.alive = true;
+    payEntityEl.style.opacity = '1';
+    payEntityEl.style.pointerEvents = 'auto';
+    // Rotate text every ~15s
+    setInterval(updatePayText, 15000);
+  }, 30000);
+
+  // Hover / click
+  let payHoverIntensity = 0;
+  function updatePayEntity() {
+    // Drift
+    payState.x += payState.vx;
+    payState.y += payState.vy;
+    payState.vx += (Math.random() - 0.5) * 0.008;
+    payState.vy += (Math.random() - 0.5) * 0.006;
+    payState.vx *= 0.994;
+    payState.vy *= 0.994;
+    const pm = 120;
+    if (payState.x < pm)     payState.vx += 0.03;
+    if (payState.x > W - pm) payState.vx -= 0.03;
+    if (payState.y < pm)     payState.vy += 0.03;
+    if (payState.y > H - pm) payState.vy -= 0.03;
+
+    payEntityEl.style.left = payState.x + 'px';
+    payEntityEl.style.top  = payState.y + 'px';
+
+    const isOver = isRevealedByPointer(payEntityEl);
+    payState.revealed = isOver;
+
+    if (isOver) {
+      payHoverIntensity = Math.min(1, payHoverIntensity + 0.04);
+      payEntityEl.style.color        = `rgba(255,255,255,${0.6 + payHoverIntensity * 0.4})`;
+      payEntityEl.style.borderColor  = `rgba(0,200,255,${0.4 + payHoverIntensity * 0.4})`;
+      payEntityEl.style.boxShadow    = `0 0 ${12 + payHoverIntensity * 30}px rgba(0,200,255,${0.3 + payHoverIntensity * 0.4}), 0 0 ${30 + payHoverIntensity * 60}px rgba(0,200,255,${0.1 + payHoverIntensity * 0.2})`;
+      // Energy boost to orbs when pay entity revealed
+      payEnergyBoost = Math.min(1, payEnergyBoost + 0.05);
+    } else {
+      payHoverIntensity = Math.max(0, payHoverIntensity - 0.025);
+      payEntityEl.style.color       = `rgba(0,0,0,1)`;
+      payEntityEl.style.borderColor = `rgba(0,0,0,1)`;
+      payEntityEl.style.boxShadow   = 'none';
+      payEnergyBoost = Math.max(0, payEnergyBoost - 0.02);
+    }
+  }
+
+  let payEnergyBoost = 0;
+
+  // Click on pay entity
+  window.addEventListener('click', e => {
+    if (!payState.alive) return;
+    const r = payEntityEl.getBoundingClientRect();
+    if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+      openPayOverlay();
+    }
+  });
+  window.addEventListener('touchend', e => {
+    if (!payState.alive) return;
+    const t = e.changedTouches[0];
+    const r = payEntityEl.getBoundingClientRect();
+    if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
+      openPayOverlay();
+    }
+  });
+
+  /* ═══════════════════════════════════
+     PAYMENT OVERLAY
+  ═══════════════════════════════════ */
+  const payOverlay   = document.getElementById('pay-overlay');
+  const payConfirm   = document.getElementById('pay-confirm');
+  const payClose     = document.getElementById('pay-close');
+  const payModalTitle= document.getElementById('pay-modal-title');
+  const amountBtns   = document.querySelectorAll('.pay-amount-btn');
+  let selectedAmount = 1;
+
+  amountBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      amountBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedAmount = parseInt(btn.dataset.amount);
+    });
+  });
+
+  function openPayOverlay() {
+    payModalTitle.textContent = PAY_TEXTS[payState.textIdx];
+    payOverlay.classList.add('open');
+  }
+  payClose.addEventListener('click', () => payOverlay.classList.remove('open'));
+
+  payConfirm.addEventListener('click', () => {
+    // Paddle checkout — replace YOUR_PADDLE_PRODUCT_ID with actual Paddle product/price ID
+    // This uses Paddle.js v2 overlay checkout
+    const paddleLoaded = typeof Paddle !== 'undefined';
+    if (paddleLoaded) {
+      Paddle.Checkout.open({
+        items: [{ priceId: 'YOUR_PADDLE_PRICE_ID', quantity: 1 }],
+        settings: {
+          displayMode: 'overlay',
+          theme: 'dark',
+          locale: 'en',
+        },
+        customData: { amount: selectedAmount },
+      });
+    } else {
+      // Fallback: open Paddle product page in new tab
+      window.open(`https://buy.paddle.com/product/YOUR_PADDLE_PRODUCT_ID`, '_blank');
+    }
+    payOverlay.classList.remove('open');
+  });
+
+  // Click outside modal
+  payOverlay.addEventListener('click', e => {
+    if (e.target === payOverlay) payOverlay.classList.remove('open');
+  });
+
+  /* ═══════════════════════════════════
+     AUDIO SYSTEM
+  ═══════════════════════════════════ */
+  let audioCtx = null;
+  let masterGain = null;
+  let muted = false;
+  let audioStarted = false;
+
+  const muteBtn = document.getElementById('mute-btn');
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    if (masterGain) masterGain.gain.setTargetAtTime(muted ? 0 : 0.12, audioCtx.currentTime, 0.3);
+    muteBtn.textContent = muted ? '♪ UNMUTE' : '♪ MUTE';
+  });
+
+  function startAudio() {
+    if (audioStarted) return;
+    audioStarted = true;
+    try {
+      audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0;
+      masterGain.connect(audioCtx.destination);
+      masterGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 2.5);
+
+      // Layer 1: drone pad
+      createDrone(55,  0.4);
+      createDrone(110, 0.25);
+      createDrone(165, 0.12);
+
+      // Layer 2: slow shimmer
+      createShimmer();
+
+    } catch(e) { /* Audio not available */ }
+  }
+
+  function createDrone(freq, gain) {
+    if (!audioCtx) return;
+    const osc  = audioCtx.createOscillator();
+    const g    = audioCtx.createGain();
+    const filt = audioCtx.createBiquadFilter();
+
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+
+    // Slow frequency drift
+    const lfo = audioCtx.createOscillator();
+    const lfog = audioCtx.createGain();
+    lfo.frequency.value = 0.05 + Math.random() * 0.04;
+    lfog.gain.value = freq * 0.004;
+    lfo.connect(lfog);
+    lfog.connect(osc.frequency);
+    lfo.start();
+
+    filt.type = 'lowpass';
+    filt.frequency.value = 800;
+
+    g.gain.value = gain;
+    osc.connect(filt);
+    filt.connect(g);
+    g.connect(masterGain);
+    osc.start();
+  }
+
+  function createShimmer() {
+    if (!audioCtx) return;
+    function tick() {
+      if (!audioCtx || muted) { setTimeout(tick, 2000); return; }
+      const osc  = audioCtx.createOscillator();
+      const g    = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880 + Math.random() * 1200;
+      g.gain.setValueAtTime(0, audioCtx.currentTime);
+      g.gain.linearRampToValueAtTime(0.018, audioCtx.currentTime + 0.4);
+      g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2.5);
+      osc.connect(g);
+      g.connect(masterGain);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 2.6);
+      setTimeout(tick, 1800 + Math.random() * 3000);
+    }
+    setTimeout(tick, 2000);
+  }
+
+  // React audio to movement
+  function reactAudio() {
+    if (!audioCtx || !masterGain || muted) return;
+    const spd = Math.min(pointerSpeed / 40, 1);
+    const target = 0.12 + spd * 0.06;
+    masterGain.gain.setTargetAtTime(target, audioCtx.currentTime, 0.1);
+  }
+
+  // Unlock audio on first touch/click
+  function unlockAudio() {
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  window.addEventListener('click',     unlockAudio, { once: false });
+  window.addEventListener('touchstart',unlockAudio, { once: false });
+
+  /* ═══════════════════════════════════
+     CURSOR COLOR
+  ═══════════════════════════════════ */
   function updateCursorColor() {
     let bestHue = 180, bestDist = Infinity;
     for (const orb of orbs) {
@@ -379,18 +1062,57 @@
     cursorDot.style.boxShadow  = `0 0 10px 3px hsl(${bestHue},100%,60%)`;
   }
 
-  /* ── Main loop ── */
+  /* ═══════════════════════════════════
+     SESSION GLYPH
+  ═══════════════════════════════════ */
+  const sessionGlyph = document.getElementById('session-glyph');
+  setInterval(() => {
+    const intensity = sessionIntensity();
+    const a = 0.04 + intensity * 0.18;
+    sessionGlyph.style.color = `rgba(255,255,255,${a})`;
+  }, 3000);
+
+  /* ═══════════════════════════════════
+     MAIN LOOP
+  ═══════════════════════════════════ */
   function loop() {
-    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    const fade = 0.15 + Math.min(pointerSpeed / 200, 0.06);
+    ctx.fillStyle = `rgba(0,0,0,${fade})`;
     ctx.fillRect(0, 0, W, H);
+
     drawSparkles();
-    for (const orb of orbs) { orb.update(); orb.draw(); }
+    updateDrawDiss();
+
+    const energy = payEnergyBoost + Math.min(pointerSpeed / 80, 0.5);
+    for (const orb of orbs) {
+      orb.update(energy);
+      orb.draw(energy);
+    }
+
+    updateSentence();
+    if (payState.alive) updatePayEntity();
     updateCursorColor();
+    reactAudio();
+
     requestAnimationFrame(loop);
   }
+
   loop();
 
 })();
 </script>
+
+<!-- Paddle.js — loads Paddle overlay checkout -->
+<!-- Replace sandbox with production when ready -->
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script>
+  // Initialize Paddle — replace with your actual Paddle seller/vendor ID
+  // For sandbox testing: Paddle.Environment.set('sandbox');
+  if (typeof Paddle !== 'undefined') {
+    // Paddle.Environment.set('sandbox'); // uncomment for sandbox
+    Paddle.Initialize({ token: 'YOUR_PADDLE_CLIENT_SIDE_TOKEN' });
+  }
+</script>
+
 </body>
 </html>
