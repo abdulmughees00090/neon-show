@@ -36,7 +36,7 @@
       user-select: none;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.6s ease;
+      transition: opacity 2s ease, text-shadow 3s ease;
       text-shadow: none;
       transform: translate(-50%, -50%);
     }
@@ -54,9 +54,9 @@
     #pay-entity {
       position: fixed;
       font-family: 'Georgia', serif;
-      font-size: clamp(0.85rem, 2vw, 1.15rem);
+      font-size: clamp(0.75rem, 1.8vw, 1rem);
       font-weight: 700;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.3em;
       text-transform: uppercase;
       color: #000;
       z-index: 12;
@@ -66,7 +66,7 @@
       border: 1px solid #000;
       border-radius: 40px;
       transform: translate(-50%, -50%);
-      transition: opacity 0.5s ease, border-color 0.3s, color 0.3s, box-shadow 0.3s;
+      transition: opacity 4s ease, border-color 3s ease, color 3s ease, box-shadow 3s ease;
       opacity: 0;
       pointer-events: none;
       white-space: nowrap;
@@ -604,7 +604,7 @@
   function isRevealedByPointer(el) {
     if (!el) return false;
     const r = el.getBoundingClientRect();
-    const pad = 60;
+    const pad = 100;
     return mx >= r.left - pad && mx <= r.right + pad &&
            my >= r.top  - pad && my <= r.bottom + pad;
   }
@@ -732,18 +732,15 @@
     s.el.classList.toggle('revealed', revealed);
 
     if (revealed) {
-      s.revealAcc += 0.012;
-      if (s.revealAcc >= 1 && s.phase === 'alive') {
-        s.phase = 'dissolving';
-        dissolveSentence(s);
-      }
+      s.revealAcc = Math.min(1, s.revealAcc + 0.008);
+      // Removed auto-dissolve on reveal, let it linger.
     } else {
-      s.revealAcc = Math.max(0, s.revealAcc - 0.003);
+      s.revealAcc = Math.max(0, s.revealAcc - 0.002);
     }
 
-    // Lifetime — dissolve even without full reveal after ~40s
+    // Lifetime — dissolve naturally after much longer
     const age = (Date.now() - s.born) / 1000;
-    if (age > 40 && s.phase === 'alive') {
+    if (age > 180 && s.phase === 'alive') {
       s.phase = 'dissolving';
       dissolveSentence(s);
     }
@@ -799,9 +796,9 @@
   payEntityEl.style.cssText = `
     position: fixed;
     font-family: 'Georgia', serif;
-    font-size: clamp(0.7rem, 1.8vw, 1rem);
+    font-size: clamp(0.65rem, 1.6vw, 0.9rem);
     font-weight: 700;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.35em;
     text-transform: uppercase;
     color: #000;
     z-index: 12;
@@ -810,7 +807,7 @@
     border: 1px solid #000;
     border-radius: 40px;
     transform: translate(-50%, -50%);
-    transition: opacity 0.6s ease, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+    transition: opacity 4s ease, color 3s ease, border-color 3s ease, box-shadow 3s ease;
     opacity: 0;
     pointer-events: none;
     white-space: nowrap;
@@ -866,18 +863,18 @@
     payState.revealed = isOver;
 
     if (isOver) {
-      payHoverIntensity = Math.min(1, payHoverIntensity + 0.04);
+      payHoverIntensity = Math.min(1, payHoverIntensity + 0.015);
       payEntityEl.style.color        = `rgba(255,255,255,${0.6 + payHoverIntensity * 0.4})`;
       payEntityEl.style.borderColor  = `rgba(0,200,255,${0.4 + payHoverIntensity * 0.4})`;
-      payEntityEl.style.boxShadow    = `0 0 ${12 + payHoverIntensity * 30}px rgba(0,200,255,${0.3 + payHoverIntensity * 0.4}), 0 0 ${30 + payHoverIntensity * 60}px rgba(0,200,255,${0.1 + payHoverIntensity * 0.2})`;
+      payEntityEl.style.boxShadow    = `0 0 ${12 + payHoverIntensity * 40}px rgba(0,200,255,${0.3 + payHoverIntensity * 0.5}), 0 0 ${40 + payHoverIntensity * 80}px rgba(0,200,255,${0.1 + payHoverIntensity * 0.3})`;
       // Energy boost to orbs when pay entity revealed
-      payEnergyBoost = Math.min(1, payEnergyBoost + 0.05);
+      payEnergyBoost = Math.min(1, payEnergyBoost + 0.02);
     } else {
-      payHoverIntensity = Math.max(0, payHoverIntensity - 0.025);
+      payHoverIntensity = Math.max(0, payHoverIntensity - 0.01);
       payEntityEl.style.color       = `rgba(0,0,0,1)`;
       payEntityEl.style.borderColor = `rgba(0,0,0,1)`;
       payEntityEl.style.boxShadow   = 'none';
-      payEnergyBoost = Math.max(0, payEnergyBoost - 0.02);
+      payEnergyBoost = Math.max(0, payEnergyBoost - 0.01);
     }
   }
 
