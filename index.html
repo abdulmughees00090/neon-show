@@ -4,7 +4,23 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-  <title>Neon Dream</title>
+
+  <!-- ═══ SEO META TAGS ═══ -->
+  <title>Neon Dream — Your Quiet Space for Thought & Calm</title>
+  <meta name="description" content="A meditative dark web experience for restless minds. When boredom strikes, when thoughts race, when anxiety creeps in — Neon Dream is your quiet, hypnotic companion in the dark."/>
+  <meta name="keywords" content="boredom helper, emotional support, anxiety reliever, stress relief, thought companion, mind wandering, calm space, meditation alternative, dark aesthetic, neon art, interactive experience, focus tool, anxiety relief, mental calm, boredom cure, ambient experience, emotional partner, mindful escape, stress controller, thought process aid, cyberpunk meditation, digital zen"/>
+  <meta name="author" content="Neon Dream"/>
+  <meta name="robots" content="index, follow"/>
+  <meta property="og:title" content="Neon Dream — A Living Space for Restless Minds"/>
+  <meta property="og:description" content="Move through darkness. Reveal hidden thoughts. A hypnotic companion for boredom, anxiety, and the 2am thought spiral."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:image" content="og-image.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Neon Dream — Emotional Companion in the Dark"/>
+  <meta name="twitter:description" content="When your mind won't stop. When the night is too quiet. Move slowly — the dream reacts."/>
+  <meta name="theme-color" content="#000000"/>
+  <link rel="canonical" href="https://yourdomain.com/"/>
+
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -14,6 +30,25 @@
       background: #000;
       cursor: none;
       font-family: 'Georgia', serif;
+    }
+
+    /* Show real cursor on overlays and interactive elements */
+    #tutorial,
+    #pay-overlay,
+    #tutorial *,
+    #pay-overlay * {
+      cursor: auto !important;
+    }
+    #tutorial .tut-btn,
+    #pay-overlay button,
+    #pay-overlay .pay-amount-btn,
+    #pay-overlay .pay-confirm-btn,
+    #pay-overlay .pay-close {
+      cursor: pointer !important;
+    }
+    #mute-btn,
+    #footer-links a {
+      cursor: pointer !important;
     }
 
     canvas {
@@ -27,17 +62,23 @@
     /* ── Wandering sentence ── */
     .wandering-sentence {
       position: fixed;
-      font-family: 'Georgia', serif;
-      font-weight: 900;
-      font-size: clamp(1.1rem, 2.8vw, 2.2rem);
+      font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+      font-weight: 400;
+      /* Mobile-first small, scales up */
+      font-size: clamp(0.75rem, 2.5vw, 1.6rem);
       color: #000;
-      white-space: nowrap;
-      letter-spacing: 0.04em;
+      /* Prevent overflow on mobile */
+      max-width: 88vw;
+      white-space: normal;
+      word-break: break-word;
+      text-align: center;
+      line-height: 1.4;
+      letter-spacing: 0.02em;
       z-index: 10;
       user-select: none;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 2s ease, text-shadow 3s ease;
+      transition: opacity 2s ease, text-shadow 2s ease;
       text-shadow: none;
       transform: translate(-50%, -50%);
     }
@@ -46,55 +87,12 @@
     }
     .wandering-sentence.revealed {
       text-shadow:
-        0 0 8px rgba(255,255,255,0.9),
-        0 0 20px rgba(255,255,255,0.6),
-        0 0 40px rgba(180,220,255,0.4);
+        0 0 6px rgba(255,255,255,0.95),
+        0 0 18px rgba(255,255,255,0.65),
+        0 0 36px rgba(180,220,255,0.45);
     }
 
-    /* ── Payment entity ── */
-    #pay-entity {
-      position: fixed;
-      font-family: 'Georgia', serif;
-      font-size: clamp(0.75rem, 1.8vw, 1rem);
-      font-weight: 700;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: #000;
-      z-index: 12;
-      user-select: none;
-      cursor: none;
-      padding: 12px 28px;
-      border: 1px solid #000;
-      border-radius: 40px;
-      transform: translate(-50%, -50%);
-      transition: opacity 4s ease, border-color 3s ease, color 3s ease, box-shadow 3s ease;
-      opacity: 0;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-    #pay-entity.alive {
-      opacity: 1;
-      pointer-events: auto;
-      cursor: none;
-    }
-    #pay-entity.revealed {
-      color: rgba(255,255,255,0.9);
-      border-color: rgba(180,220,255,0.6);
-      box-shadow:
-        0 0 12px rgba(0,200,255,0.4),
-        0 0 30px rgba(0,200,255,0.2),
-        inset 0 0 12px rgba(0,200,255,0.05);
-    }
-    #pay-entity.pay-pulse {
-      animation: payPulse 0.6s ease;
-    }
-    @keyframes payPulse {
-      0%   { box-shadow: 0 0 12px rgba(0,200,255,0.4), 0 0 30px rgba(0,200,255,0.2); }
-      50%  { box-shadow: 0 0 30px rgba(0,200,255,0.9), 0 0 70px rgba(0,200,255,0.5), 0 0 100px rgba(200,100,255,0.3); }
-      100% { box-shadow: 0 0 12px rgba(0,200,255,0.4), 0 0 30px rgba(0,200,255,0.2); }
-    }
-
-    /* ── Custom cursor dot ── */
+    /* ── Custom cursor dot (hidden on overlays via body rule) ── */
     #cursor-dot {
       position: fixed;
       width: 7px; height: 7px;
@@ -129,7 +127,7 @@
       max-width: 480px;
       width: 88%;
       text-align: center;
-      padding: 52px 44px 56px;
+      padding: 48px 36px 52px;
       border-radius: 4px;
       background: rgba(6,6,6,0.85);
       backdrop-filter: blur(20px);
@@ -157,8 +155,8 @@
     @keyframes spinBorder { to { transform: rotate(360deg); } }
 
     .tut-glyph {
-      font-size: 2rem;
-      margin-bottom: 28px;
+      font-size: 1.8rem;
+      margin-bottom: 24px;
       display: block;
       color: rgba(255,255,255,0.15);
       letter-spacing: 0.6em;
@@ -171,18 +169,18 @@
 
     .tut-line1 {
       font-family: 'Georgia', serif;
-      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      font-size: clamp(1rem, 3vw, 1.45rem);
       font-weight: 400;
       font-style: italic;
       color: rgba(255,255,255,0.7);
       margin-bottom: 10px;
-      line-height: 1.7;
+      line-height: 1.75;
     }
     .tut-line2 {
-      font-family: 'Georgia', serif;
-      font-size: clamp(0.8rem, 2vw, 1rem);
+      font-family: Arial, sans-serif;
+      font-size: clamp(0.72rem, 1.8vw, 0.88rem);
       color: rgba(255,255,255,0.28);
-      margin-bottom: 44px;
+      margin-bottom: 40px;
       letter-spacing: 0.1em;
     }
 
@@ -190,23 +188,46 @@
       background: transparent;
       border: 1px solid rgba(255,255,255,0.18);
       color: rgba(255,255,255,0.55);
-      padding: 14px 48px;
+      padding: 13px 44px;
       border-radius: 40px;
       font-family: 'Georgia', serif;
       font-size: 0.9rem;
       letter-spacing: 0.2em;
-      cursor: none;
       position: relative;
       overflow: hidden;
       transition: border-color 0.4s, color 0.4s, box-shadow 0.4s;
     }
     .tut-btn:hover {
       border-color: rgba(0,255,238,0.5);
-      color: rgba(255,255,255,0.85);
+      color: rgba(255,255,255,0.88);
       box-shadow: 0 0 20px rgba(0,255,238,0.15);
     }
 
-    /* ── Paddle overlay ── */
+    /* ── Payment entity (dynamic, JS-placed) ── */
+    #pay-entity-dyn {
+      position: fixed;
+      font-family: 'Georgia', serif;
+      font-size: clamp(0.6rem, 1.5vw, 0.88rem);
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #000;
+      z-index: 12;
+      user-select: none;
+      padding: 10px 22px;
+      border: 1px solid #000;
+      border-radius: 40px;
+      transform: translate(-50%, -50%);
+      transition: opacity 4s ease, color 2s ease, border-color 2s ease, box-shadow 2s ease;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      cursor: pointer !important;
+      /* never overflow on mobile */
+      max-width: 80vw;
+    }
+
+    /* ── Payment overlay ── */
     #pay-overlay {
       position: fixed;
       inset: 0;
@@ -214,18 +235,17 @@
       display: none;
       align-items: center;
       justify-content: center;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(8px);
-      animation: tutFadeIn 0.5s ease forwards;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(10px);
     }
     #pay-overlay.open { display: flex; }
     .pay-modal {
       max-width: 400px;
-      width: 88%;
+      width: 90%;
       background: rgba(5,5,5,0.97);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 4px;
-      padding: 48px 44px 52px;
+      padding: 44px 36px 48px;
       text-align: center;
       position: relative;
     }
@@ -249,34 +269,34 @@
     }
     .pay-title {
       font-family: 'Georgia', serif;
-      font-size: 1.3rem;
+      font-size: clamp(1.1rem, 3vw, 1.3rem);
       font-style: italic;
-      color: rgba(255,255,255,0.7);
-      margin-bottom: 12px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 10px;
     }
     .pay-sub {
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.2);
-      letter-spacing: 0.12em;
-      margin-bottom: 36px;
-      line-height: 1.8;
+      font-family: Arial, sans-serif;
+      font-size: clamp(0.72rem, 1.8vw, 0.82rem);
+      color: rgba(255,255,255,0.22);
+      letter-spacing: 0.08em;
+      margin-bottom: 32px;
+      line-height: 1.85;
     }
     .pay-amounts {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
       flex-wrap: wrap;
     }
     .pay-amount-btn {
       background: transparent;
       border: 1px solid rgba(255,255,255,0.15);
       color: rgba(255,255,255,0.55);
-      padding: 10px 22px;
+      padding: 9px 20px;
       border-radius: 40px;
       font-family: 'Georgia', serif;
       font-size: 0.9rem;
-      cursor: none;
       transition: all 0.3s;
       letter-spacing: 0.05em;
     }
@@ -289,26 +309,25 @@
       background: transparent;
       border: 1px solid rgba(0,200,255,0.4);
       color: rgba(255,255,255,0.7);
-      padding: 14px 52px;
+      padding: 13px 44px;
       border-radius: 40px;
       font-family: 'Georgia', serif;
       font-size: 0.88rem;
-      letter-spacing: 0.18em;
-      cursor: none;
+      letter-spacing: 0.16em;
       width: 100%;
       transition: all 0.4s;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .pay-confirm-btn:hover {
-      border-color: rgba(0,200,255,0.8);
-      box-shadow: 0 0 24px rgba(0,200,255,0.25);
+      border-color: rgba(0,200,255,0.85);
+      box-shadow: 0 0 24px rgba(0,200,255,0.28);
       color: #fff;
     }
     .pay-close {
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.15);
-      letter-spacing: 0.15em;
-      cursor: none;
+      font-family: Arial, sans-serif;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.14);
+      letter-spacing: 0.14em;
       background: none;
       border: none;
       transition: color 0.3s;
@@ -318,17 +337,17 @@
     /* ── Mute button ── */
     #mute-btn {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: 20px;
+      right: 20px;
       z-index: 50;
       background: none;
       border: 1px solid rgba(255,255,255,0.08);
       color: rgba(255,255,255,0.2);
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      padding: 8px 16px;
+      font-family: Arial, sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      padding: 7px 14px;
       border-radius: 40px;
-      cursor: none;
       transition: all 0.3s;
     }
     #mute-btn:hover {
@@ -339,21 +358,24 @@
     /* ── Footer links ── */
     #footer-links {
       position: fixed;
-      bottom: 24px;
-      right: 120px;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 50;
       display: flex;
-      gap: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     #footer-links a {
       background: none;
-      border: 1px solid rgba(255,255,255,0.08);
-      color: rgba(255,255,255,0.2);
-      font-size: 0.6rem;
-      letter-spacing: 0.15em;
-      padding: 6px 12px;
+      border: 1px solid rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.18);
+      font-family: Arial, sans-serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.12em;
+      padding: 5px 10px;
       border-radius: 40px;
-      cursor: none;
       text-decoration: none;
       transition: all 0.3s;
     }
@@ -362,18 +384,27 @@
       color: rgba(255,255,255,0.5);
     }
 
-    /* ── Session timer glyph ── */
+    /* ── Session glyph ── */
     #session-glyph {
       position: fixed;
-      bottom: 24px;
-      left: 24px;
+      bottom: 20px;
+      left: 20px;
       z-index: 50;
       color: rgba(255,255,255,0.04);
-      font-size: 0.6rem;
-      letter-spacing: 0.25em;
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
       font-family: 'Georgia', serif;
       pointer-events: none;
       transition: color 2s ease;
+    }
+
+    /* ── Mobile adjustments ── */
+    @media (max-width: 480px) {
+      .tut-inner { padding: 36px 24px 40px; }
+      .pay-modal { padding: 36px 24px 40px; }
+      #footer-links { bottom: 56px; }
+      #mute-btn { bottom: 20px; right: 12px; }
+      #session-glyph { display: none; }
     }
   </style>
 </head>
@@ -404,7 +435,7 @@
 <div id="pay-overlay">
   <div class="pay-modal">
     <div class="pay-title" id="pay-modal-title">Keep It Alive</div>
-    <div class="pay-sub">Something kept you here.<br>Leave a trace of light.</div>
+    <div class="pay-sub" id="pay-modal-sub">Something kept you here.<br>Leave a trace of light.</div>
     <div class="pay-amounts">
       <button class="pay-amount-btn active" data-amount="1">$1</button>
       <button class="pay-amount-btn" data-amount="3">$3</button>
@@ -422,9 +453,12 @@
   /* ═══════════════════════════════════
      TUTORIAL
   ═══════════════════════════════════ */
-  const STORAGE_KEY = 'neonDream_v3';
+  const STORAGE_KEY = 'neonDream_v4';
   const tutEl  = document.getElementById('tutorial');
   const tutBtn = document.getElementById('tut-enter');
+
+  // Hide custom cursor dot when over overlays
+  const cursorDot = document.getElementById('cursor-dot');
 
   function hideTutorial() {
     tutEl.classList.add('hiding');
@@ -445,7 +479,7 @@
     H = canvas.height = window.innerHeight;
   }
   resize();
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', () => { resize(); });
 
   /* ═══════════════════════════════════
      POINTER TRACKING
@@ -453,7 +487,7 @@
   let mx = W / 2, my = H / 2;
   let pmx = mx, pmy = my;
   let pointerSpeed = 0;
-  const cursorDot = document.getElementById('cursor-dot');
+  let isTouch = false;
 
   function onPointerMove(cx, cy) {
     pmx = mx; pmy = my;
@@ -463,30 +497,43 @@
     cursorDot.style.top  = my + 'px';
   }
 
-  window.addEventListener('mousemove', e => onPointerMove(e.clientX, e.clientY));
+  window.addEventListener('mousemove', e => {
+    isTouch = false;
+    onPointerMove(e.clientX, e.clientY);
+    // Hide dot when over an overlay
+    const overOverlay = tutEl.style.display !== 'none' && tutEl.offsetParent !== null
+      || document.getElementById('pay-overlay').classList.contains('open');
+    cursorDot.style.opacity = overOverlay ? '0' : '1';
+  });
   window.addEventListener('touchmove', e => {
-    e.preventDefault();
+    isTouch = true;
+    if (!document.getElementById('pay-overlay').classList.contains('open')) {
+      e.preventDefault();
+    }
     const t = e.touches[0];
     onPointerMove(t.clientX, t.clientY);
   }, { passive: false });
   window.addEventListener('touchstart', e => {
+    isTouch = true;
     const t = e.touches[0];
     onPointerMove(t.clientX, t.clientY);
   }, { passive: true });
+
+  /* On touch devices, hide the fake cursor dot */
+  if ('ontouchstart' in window) cursorDot.style.display = 'none';
 
   /* ═══════════════════════════════════
      SESSION DURATION
   ═══════════════════════════════════ */
   const sessionStart = Date.now();
   function sessionMinutes() { return (Date.now() - sessionStart) / 60000; }
-  // Intensity 0–1 that ramps over 10 minutes
   function sessionIntensity() { return Math.min(1, sessionMinutes() / 10); }
 
   /* ═══════════════════════════════════
      ORB SYSTEM
   ═══════════════════════════════════ */
-  const TRAIL_LEN   = 52;
-  const N_ORBS      = 8;
+  const TRAIL_LEN    = 52;
+  const N_ORBS       = 8;
   const SPAWN_SPREAD = 200;
 
   function randHue() { return Math.random() * 360; }
@@ -557,7 +604,7 @@
     }
   }
 
-  const orbs = Array.from({ length: N_ORBS }, () => new Orb() );
+  const orbs = Array.from({ length: N_ORBS }, () => new Orb());
 
   /* ═══════════════════════════════════
      SPARKLES
@@ -593,7 +640,7 @@
   const dissParticles = [];
 
   function spawnDissolution(x, y, text, hue) {
-    const count = 30 + Math.floor(text.length * 1.2);
+    const count = 28 + Math.floor(text.length * 1.1);
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
       const spd   = 0.3 + Math.random() * 1.4;
@@ -631,149 +678,167 @@
   }
 
   /* ═══════════════════════════════════
-     REVEAL HIT-TEST (canvas-space pixel check)
+     REVEAL HIT-TEST
   ═══════════════════════════════════ */
-  // We check if cursor is within a padded box around the element
   function isRevealedByPointer(el) {
     if (!el) return false;
     const r = el.getBoundingClientRect();
-    const pad = 100;
-    return mx >= r.left - pad && mx <= r.right + pad &&
+    const pad = isTouch ? 55 : 90;
+    return mx >= r.left - pad && mx <= r.right  + pad &&
            my >= r.top  - pad && my <= r.bottom + pad;
   }
 
   /* ═══════════════════════════════════
-     SENTENCE POOL
+     SENTENCE POOLS — emotionally grouped
   ═══════════════════════════════════ */
-  const SENTENCES_BASE = [
-    "You stayed longer than most.",
-    "Something kept you here.",
-    "You came for nothing and stayed.",
-    "Nobody knows you are here.",
-    "You almost ignored this.",
-    "You hover like you care.",
-    "Most people already left.",
-    "You are still searching.",
-    "You found this at the right time.",
-    "This was made for someone like you.",
-    "The darkness remembers movement.",
-    "Some things exist only to be found.",
-    "You returned to the beginning.",
-    "Every light here is borrowed.",
-    "Silence is also a kind of signal.",
+
+  // Phase 1: Boredom / arrival (0–2 min)
+  const SENTENCES_BOREDOM = [
+    "You opened this because something was missing.",
+    "This is what boredom looks like when it breathes.",
+    "You didn't know what you were looking for.",
+    "The night gets quiet in a specific way.",
+    "You needed somewhere to put your attention.",
+    "Most people scroll. You stopped here.",
+    "This is the gap between one thought and the next.",
+    "You found this at the right kind of wrong time.",
+    "Your mind needed somewhere to rest.",
+    "Boredom is just the mind asking for more.",
   ];
 
-  const SENTENCES_DEEP = [
-    "You would have paid if this were entertainment.",
-    "A stranger already kept this alive.",
-    "This website remembers hesitation.",
+  // Phase 2: Recognition / thought spiral (2–5 min)
+  const SENTENCES_THOUGHT = [
+    "You are thinking about something you haven't said.",
+    "Some thoughts only exist when nobody's watching.",
+    "The thing you keep coming back to — it matters.",
+    "You stayed because something here felt familiar.",
+    "This is what a thought looks like before it has words.",
+    "You're not distracted. You're processing.",
+    "Some people never stop to feel this.",
+    "The mind in motion is always searching for something.",
+    "You hover like you're deciding something.",
+    "You almost left. But you didn't.",
+    "There's something you've been meaning to figure out.",
+    "You came for nothing and found something quieter.",
+  ];
+
+  // Phase 3: Deep presence / emotional (5–8 min)
+  const SENTENCES_PRESENCE = [
+    "You have been here long enough to know this matters.",
+    "The lights remember every cursor that passed through.",
+    "Nobody knows you are here. That's the point.",
+    "Some people keep things alive just by staying.",
+    "You would have paid if this were a film.",
+    "A stranger already kept this alive for you.",
     "You are the reason the lights are still on.",
-    "Some people leave before they understand.",
-    "You have been here long enough to know.",
-    "The dream only exists because you stayed.",
+    "The dream only exists because someone stayed.",
+    "This light costs someone something real.",
+    "Staying is a form of care most people forget.",
+  ];
+
+  // Phase 4: Late / accountability (8+ min)
+  const SENTENCES_LATE = [
+    "You have been here long enough to owe this something.",
+    "Most people left before understanding. You didn't.",
+    "You stayed through the quiet and the dark.",
+    "The ones who stay this long always feel it.",
+    "This website remembers hesitation. And generosity.",
     "Nobody will know you were here unless you leave something.",
-    "This light costs someone something.",
-    "You came back. That means something.",
-    "You are the last one watching.",
-    "Staying is a form of care.",
+    "You could have done more. You still can.",
+    "Someone already did. You could be next.",
+    "The lights dim when nobody feeds them.",
+    "You are the last one watching. Make it mean something.",
   ];
 
   function getSentencePool() {
-    const intensity = sessionIntensity();
-    if (intensity < 0.2) return SENTENCES_BASE;
-    if (intensity < 0.6) return [...SENTENCES_BASE, ...SENTENCES_DEEP.slice(0, 4)];
-    return [...SENTENCES_BASE, ...SENTENCES_DEEP];
+    const m = sessionMinutes();
+    if (m < 2)  return SENTENCES_BOREDOM;
+    if (m < 5)  return [...SENTENCES_BOREDOM, ...SENTENCES_THOUGHT];
+    if (m < 8)  return [...SENTENCES_THOUGHT, ...SENTENCES_PRESENCE];
+    return [...SENTENCES_PRESENCE, ...SENTENCES_LATE];
   }
 
-  function randomSentence(exclude) {
-    const pool = getSentencePool().filter(s => s !== exclude);
-    return pool[Math.floor(Math.random() * pool.length)];
+  let lastSentenceText = '';
+  function randomSentence() {
+    const pool = getSentencePool().filter(s => s !== lastSentenceText);
+    const t = pool[Math.floor(Math.random() * pool.length)];
+    lastSentenceText = t;
+    return t;
   }
 
   /* ═══════════════════════════════════
      WANDERING SENTENCE SYSTEM
+     — teleports to new random position on each spawn
   ═══════════════════════════════════ */
   let activeSentence = null;
-  let nextSentenceTimer = null;
-  let revealProgress  = 0;
-  let sentenceHue     = 180;
+  let sentenceHue    = 180;
 
-  function createSentenceEl(text) {
-    const el = document.createElement('div');
-    el.className = 'wandering-sentence';
-    el.textContent = text;
-    document.body.appendChild(el);
-    return el;
+  // Mobile-safe margins
+  function safeMargin() {
+    return W < 480 ? 55 : 100;
   }
 
   function spawnSentence() {
-    const margin = 120;
-    const text = randomSentence(activeSentence ? activeSentence.text : null);
+    const text = randomSentence();
     sentenceHue = randHue();
 
-    const el = createSentenceEl(text);
-    // Initial position: random but not near edges
-    const x = margin + Math.random() * (W - margin * 2);
-    const y = margin + Math.random() * (H - margin * 2);
+    const el = document.createElement('div');
+    el.className = 'wandering-sentence';
+    el.textContent = text;
+    el.style.opacity = '0';
+    document.body.appendChild(el);
 
-    const obj = {
-      el, text,
-      x, y,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.22,
-      hue: sentenceHue,
-      phase: 'entering',   // entering | alive | dissolving
-      revealAcc: 0,
-      born: Date.now(),
-    };
-
-    // Fade in
+    // Wait one frame to get real dimensions after text is set
     requestAnimationFrame(() => {
+      const elW = Math.min(el.offsetWidth, W * 0.88);
+      const elH = el.offsetHeight;
+      const m   = safeMargin();
+
+      // Random position guaranteed not to clip edges
+      const maxX = W - elW / 2 - m;
+      const minX = elW / 2 + m;
+      const maxY = H - elH / 2 - m;
+      const minY = elH / 2 + m;
+
+      const x = minX + Math.random() * Math.max(0, maxX - minX);
+      const y = minY + Math.random() * Math.max(0, maxY - minY);
+
       el.style.left = x + 'px';
       el.style.top  = y + 'px';
-      el.classList.add('alive');
-    });
 
-    activeSentence = obj;
-    revealProgress = 0;
+      // Tiny nudge delay so opacity transition fires
+      requestAnimationFrame(() => { el.classList.add('alive'); });
+
+      const obj = {
+        el, text,
+        x, y,
+        hue: sentenceHue,
+        phase: 'alive',
+        revealAcc: 0,
+        born: Date.now(),
+      };
+      activeSentence = obj;
+    });
   }
 
   function updateSentence() {
     if (!activeSentence) return;
     const s = activeSentence;
-
-    // Gentle drift
-    s.x += s.vx;
-    s.y += s.vy;
-    s.vx += (Math.random() - 0.5) * 0.012;
-    s.vy += (Math.random() - 0.5) * 0.008;
-    // Dampen
-    s.vx *= 0.992;
-    s.vy *= 0.992;
-    // Soft boundary bounce
-    const m = 80;
-    if (s.x < m)     s.vx += 0.04;
-    if (s.x > W - m) s.vx -= 0.04;
-    if (s.y < m)     s.vy += 0.04;
-    if (s.y > H - m) s.vy -= 0.04;
-
-    s.el.style.left = s.x + 'px';
-    s.el.style.top  = s.y + 'px';
+    if (s.phase === 'dissolving') return;
 
     // Reveal check
     const revealed = isRevealedByPointer(s.el);
     s.el.classList.toggle('revealed', revealed);
 
     if (revealed) {
-      s.revealAcc = Math.min(1, s.revealAcc + 0.008);
-      // Removed auto-dissolve on reveal, let it linger.
+      s.revealAcc = Math.min(1, s.revealAcc + 0.006);
     } else {
       s.revealAcc = Math.max(0, s.revealAcc - 0.002);
     }
 
-    // Lifetime — dissolve naturally after much longer
+    // Dissolve after 90s or if deeply revealed
     const age = (Date.now() - s.born) / 1000;
-    if (age > 180 && s.phase === 'alive') {
+    if ((age > 90 || s.revealAcc >= 1) && s.phase === 'alive') {
       s.phase = 'dissolving';
       dissolveSentence(s);
     }
@@ -789,17 +854,16 @@
     setTimeout(() => {
       s.el.remove();
       activeSentence = null;
-      // Spawn next after a pause
-      const delay = 3000 + Math.random() * 4000;
-      nextSentenceTimer = setTimeout(spawnSentence, delay);
+      const delay = 2500 + Math.random() * 3500;
+      setTimeout(spawnSentence, delay);
     }, 1300);
   }
 
-  // Kick off
-  setTimeout(spawnSentence, 5000);
+  setTimeout(spawnSentence, 4000);
 
   /* ═══════════════════════════════════
      PAYMENT ENTITY
+     — teleports to new random position on text change
   ═══════════════════════════════════ */
   const PAY_TEXTS = [
     "Keep It Alive",
@@ -808,137 +872,115 @@
     "Continue The Signal",
     "Stay A Little Longer",
     "Keep The Dream Breathing",
-    "Add Another Thought",
     "The Lights Remember",
     "Keep This Existing",
     "Someone Already Did",
     "Leave Something Behind",
-    "You Could Have Done More",
+    "You Could Still Do More",
+    "Add Another Thought",
   ];
 
-  const payEl = document.getElementById('pay-entity') || (() => {
-    const el = document.createElement('div');
-    el.id = 'pay-entity';
-    document.body.appendChild(el);
-    return el;
-  })();
+  // Contextual subtitles for the payment modal
+  const PAY_SUBS = [
+    "You've been here long enough to know it's real.",
+    "Something kept you here. Leave a trace of light.",
+    "The ones who stay always understand eventually.",
+    "A stranger already did this for you once.",
+    "This only exists because someone cared enough.",
+    "You found it. That already means something.",
+  ];
 
-  // Create the element if it doesn't exist from HTML
   const payEntityEl = document.createElement('div');
   payEntityEl.id = 'pay-entity-dyn';
-  payEntityEl.style.cssText = `
-    position: fixed;
-    font-family: 'Georgia', serif;
-    font-size: clamp(0.65rem, 1.6vw, 0.9rem);
-    font-weight: 700;
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
-    color: #000;
-    z-index: 12;
-    user-select: none;
-    padding: 11px 26px;
-    border: 1px solid #000;
-    border-radius: 40px;
-    transform: translate(-50%, -50%);
-    transition: opacity 4s ease, color 3s ease, border-color 3s ease, box-shadow 3s ease;
-    opacity: 0;
-    pointer-events: none;
-    white-space: nowrap;
-    cursor: none;
-  `;
   document.body.appendChild(payEntityEl);
 
   const payState = {
     x: W * 0.7,
-    y: H * 0.4,
-    vx: (Math.random() - 0.5) * 0.2,
-    vy: (Math.random() - 0.5) * 0.15,
+    y: H * 0.35,
     alive: false,
-    revealed: false,
     textIdx: Math.floor(Math.random() * PAY_TEXTS.length),
   };
 
-  function updatePayText() {
-    payState.textIdx = (payState.textIdx + 1) % PAY_TEXTS.length;
-    payEntityEl.textContent = PAY_TEXTS[payState.textIdx];
-  }
-  payEntityEl.textContent = PAY_TEXTS[payState.textIdx];
-
-  // Show payment entity after 30s
-  setTimeout(() => {
-    payState.alive = true;
-    payEntityEl.style.opacity = '1';
-    payEntityEl.style.pointerEvents = 'auto';
-    // Rotate text every ~15s
-    setInterval(updatePayText, 15000);
-  }, 30000);
-
-  // Hover / click
-  let payHoverIntensity = 0;
-  function updatePayEntity() {
-    // Drift
-    payState.x += payState.vx;
-    payState.y += payState.vy;
-    payState.vx += (Math.random() - 0.5) * 0.008;
-    payState.vy += (Math.random() - 0.5) * 0.006;
-    payState.vx *= 0.994;
-    payState.vy *= 0.994;
-    const pm = 120;
-    if (payState.x < pm)     payState.vx += 0.03;
-    if (payState.x > W - pm) payState.vx -= 0.03;
-    if (payState.y < pm)     payState.vy += 0.03;
-    if (payState.y > H - pm) payState.vy -= 0.03;
-
+  function randomPayPosition() {
+    const m = 130;
+    // Also get element width to prevent clipping
+    const elW = payEntityEl.offsetWidth || 180;
+    const elH = payEntityEl.offsetHeight || 44;
+    payState.x = Math.max(elW/2 + m, Math.min(W - elW/2 - m, m + Math.random() * (W - m*2)));
+    payState.y = Math.max(elH/2 + m, Math.min(H - elH/2 - m, m + Math.random() * (H - m*2)));
     payEntityEl.style.left = payState.x + 'px';
     payEntityEl.style.top  = payState.y + 'px';
+  }
 
+  payEntityEl.textContent = PAY_TEXTS[payState.textIdx];
+
+  function updatePayText() {
+    // Fade out, teleport, fade in
+    payEntityEl.style.opacity = '0';
+    setTimeout(() => {
+      payState.textIdx = (payState.textIdx + 1) % PAY_TEXTS.length;
+      payEntityEl.textContent = PAY_TEXTS[payState.textIdx];
+      randomPayPosition();
+      setTimeout(() => { payEntityEl.style.opacity = '1'; }, 400);
+    }, 800);
+  }
+
+  // Show payment entity after 25s
+  setTimeout(() => {
+    payState.alive = true;
+    randomPayPosition();
+    payEntityEl.style.opacity = '1';
+    payEntityEl.style.pointerEvents = 'auto';
+    setInterval(updatePayText, 14000);
+  }, 25000);
+
+  // Hover / click intensity
+  let payHoverIntensity = 0;
+  let payEnergyBoost    = 0;
+
+  function updatePayEntity() {
+    if (!payState.alive) return;
     const isOver = isRevealedByPointer(payEntityEl);
-    payState.revealed = isOver;
 
     if (isOver) {
-      payHoverIntensity = Math.min(1, payHoverIntensity + 0.015);
-      payEntityEl.style.color        = `rgba(255,255,255,${0.6 + payHoverIntensity * 0.4})`;
-      payEntityEl.style.borderColor  = `rgba(0,200,255,${0.4 + payHoverIntensity * 0.4})`;
-      payEntityEl.style.boxShadow    = `0 0 ${12 + payHoverIntensity * 40}px rgba(0,200,255,${0.3 + payHoverIntensity * 0.5}), 0 0 ${40 + payHoverIntensity * 80}px rgba(0,200,255,${0.1 + payHoverIntensity * 0.3})`;
-      // Energy boost to orbs when pay entity revealed
-      payEnergyBoost = Math.min(1, payEnergyBoost + 0.02);
+      payHoverIntensity = Math.min(1, payHoverIntensity + 0.018);
+      payEntityEl.style.color       = `rgba(255,255,255,${0.6 + payHoverIntensity * 0.4})`;
+      payEntityEl.style.borderColor = `rgba(0,200,255,${0.4 + payHoverIntensity * 0.4})`;
+      payEntityEl.style.boxShadow   = `0 0 ${12 + payHoverIntensity * 40}px rgba(0,200,255,${0.3 + payHoverIntensity*0.5}), 0 0 ${40 + payHoverIntensity*80}px rgba(0,200,255,${0.1 + payHoverIntensity*0.3})`;
+      payEnergyBoost = Math.min(1, payEnergyBoost + 0.022);
     } else {
       payHoverIntensity = Math.max(0, payHoverIntensity - 0.01);
-      payEntityEl.style.color       = `rgba(0,0,0,1)`;
-      payEntityEl.style.borderColor = `rgba(0,0,0,1)`;
+      payEntityEl.style.color       = 'rgba(0,0,0,1)';
+      payEntityEl.style.borderColor = 'rgba(0,0,0,1)';
       payEntityEl.style.boxShadow   = 'none';
       payEnergyBoost = Math.max(0, payEnergyBoost - 0.01);
     }
   }
 
-  let payEnergyBoost = 0;
-
   // Click on pay entity
-  window.addEventListener('click', e => {
+  function handlePayClick(cx, cy) {
     if (!payState.alive) return;
     const r = payEntityEl.getBoundingClientRect();
-    if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+    if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) {
       openPayOverlay();
     }
-  });
+  }
+  window.addEventListener('click',    e => handlePayClick(e.clientX, e.clientY));
   window.addEventListener('touchend', e => {
-    if (!payState.alive) return;
     const t = e.changedTouches[0];
-    const r = payEntityEl.getBoundingClientRect();
-    if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
-      openPayOverlay();
-    }
+    handlePayClick(t.clientX, t.clientY);
   });
 
   /* ═══════════════════════════════════
      PAYMENT OVERLAY
   ═══════════════════════════════════ */
-  const payOverlay   = document.getElementById('pay-overlay');
-  const payConfirm   = document.getElementById('pay-confirm');
-  const payClose     = document.getElementById('pay-close');
-  const payModalTitle= document.getElementById('pay-modal-title');
-  const amountBtns   = document.querySelectorAll('.pay-amount-btn');
-  let selectedAmount = 1;
+  const payOverlay    = document.getElementById('pay-overlay');
+  const payConfirm    = document.getElementById('pay-confirm');
+  const payClose      = document.getElementById('pay-close');
+  const payModalTitle = document.getElementById('pay-modal-title');
+  const payModalSub   = document.getElementById('pay-modal-sub');
+  const amountBtns    = document.querySelectorAll('.pay-amount-btn');
+  let selectedAmount  = 1;
 
   amountBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -950,49 +992,37 @@
 
   function openPayOverlay() {
     payModalTitle.textContent = PAY_TEXTS[payState.textIdx];
+    // Pick contextual sub based on session time
+    const subIdx = Math.min(Math.floor(sessionMinutes() / 2), PAY_SUBS.length - 1);
+    payModalSub.innerHTML = PAY_SUBS[subIdx].replace('. ', '.<br>');
     payOverlay.classList.add('open');
   }
   payClose.addEventListener('click', () => payOverlay.classList.remove('open'));
+  payOverlay.addEventListener('click', e => { if (e.target === payOverlay) payOverlay.classList.remove('open'); });
 
   payConfirm.addEventListener('click', () => {
-    // Paddle checkout — replace YOUR_PADDLE_PRODUCT_ID with actual Paddle product/price ID
-    // This uses Paddle.js v2 overlay checkout
-    const paddleLoaded = typeof Paddle !== 'undefined';
-    if (paddleLoaded) {
+    if (typeof Paddle !== 'undefined') {
       Paddle.Checkout.open({
         items: [{ priceId: 'YOUR_PADDLE_PRICE_ID', quantity: 1 }],
-        settings: {
-          displayMode: 'overlay',
-          theme: 'dark',
-          locale: 'en',
-        },
+        settings: { displayMode: 'overlay', theme: 'dark', locale: 'en' },
         customData: { amount: selectedAmount },
       });
     } else {
-      // Fallback: open Paddle product page in new tab
-      window.open(`https://buy.paddle.com/product/YOUR_PADDLE_PRODUCT_ID`, '_blank');
+      window.open('https://buy.paddle.com/product/YOUR_PADDLE_PRODUCT_ID', '_blank');
     }
     payOverlay.classList.remove('open');
-  });
-
-  // Click outside modal
-  payOverlay.addEventListener('click', e => {
-    if (e.target === payOverlay) payOverlay.classList.remove('open');
   });
 
   /* ═══════════════════════════════════
      AUDIO SYSTEM
   ═══════════════════════════════════ */
-  let audioCtx = null;
-  let masterGain = null;
-  let muted = false;
-  let audioStarted = false;
+  let audioCtx = null, masterGain = null;
+  let muted = false, audioStarted = false;
 
-  const muteBtn = document.getElementById('mute-btn');
-  muteBtn.addEventListener('click', () => {
+  document.getElementById('mute-btn').addEventListener('click', () => {
     muted = !muted;
     if (masterGain) masterGain.gain.setTargetAtTime(muted ? 0 : 0.12, audioCtx.currentTime, 0.3);
-    muteBtn.textContent = muted ? '♪ UNMUTE' : '♪ MUTE';
+    document.getElementById('mute-btn').textContent = muted ? '♪ UNMUTE' : '♪ MUTE';
   });
 
   function startAudio() {
@@ -1004,80 +1034,51 @@
       masterGain.gain.value = 0;
       masterGain.connect(audioCtx.destination);
       masterGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 2.5);
-
-      // Layer 1: drone pad
-      createDrone(55,  0.4);
-      createDrone(110, 0.25);
-      createDrone(165, 0.12);
-
-      // Layer 2: slow shimmer
+      createDrone(55, 0.4); createDrone(110, 0.25); createDrone(165, 0.12);
       createShimmer();
-
-    } catch(e) { /* Audio not available */ }
+    } catch(e) {}
   }
 
   function createDrone(freq, gain) {
     if (!audioCtx) return;
-    const osc  = audioCtx.createOscillator();
-    const g    = audioCtx.createGain();
+    const osc = audioCtx.createOscillator();
+    const g   = audioCtx.createGain();
     const filt = audioCtx.createBiquadFilter();
-
-    osc.type = 'sine';
-    osc.frequency.value = freq;
-
-    // Slow frequency drift
+    osc.type = 'sine'; osc.frequency.value = freq;
     const lfo = audioCtx.createOscillator();
     const lfog = audioCtx.createGain();
     lfo.frequency.value = 0.05 + Math.random() * 0.04;
     lfog.gain.value = freq * 0.004;
-    lfo.connect(lfog);
-    lfog.connect(osc.frequency);
-    lfo.start();
-
-    filt.type = 'lowpass';
-    filt.frequency.value = 800;
-
+    lfo.connect(lfog); lfog.connect(osc.frequency); lfo.start();
+    filt.type = 'lowpass'; filt.frequency.value = 800;
     g.gain.value = gain;
-    osc.connect(filt);
-    filt.connect(g);
-    g.connect(masterGain);
-    osc.start();
+    osc.connect(filt); filt.connect(g); g.connect(masterGain); osc.start();
   }
 
   function createShimmer() {
     if (!audioCtx) return;
     function tick() {
       if (!audioCtx || muted) { setTimeout(tick, 2000); return; }
-      const osc  = audioCtx.createOscillator();
-      const g    = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 880 + Math.random() * 1200;
+      const osc = audioCtx.createOscillator();
+      const g   = audioCtx.createGain();
+      osc.type = 'sine'; osc.frequency.value = 880 + Math.random() * 1200;
       g.gain.setValueAtTime(0, audioCtx.currentTime);
       g.gain.linearRampToValueAtTime(0.018, audioCtx.currentTime + 0.4);
       g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2.5);
-      osc.connect(g);
-      g.connect(masterGain);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 2.6);
+      osc.connect(g); g.connect(masterGain); osc.start(); osc.stop(audioCtx.currentTime + 2.6);
       setTimeout(tick, 1800 + Math.random() * 3000);
     }
     setTimeout(tick, 2000);
   }
 
-  // React audio to movement
   function reactAudio() {
     if (!audioCtx || !masterGain || muted) return;
     const spd = Math.min(pointerSpeed / 40, 1);
-    const target = 0.12 + spd * 0.06;
-    masterGain.gain.setTargetAtTime(target, audioCtx.currentTime, 0.1);
+    masterGain.gain.setTargetAtTime(0.12 + spd * 0.06, audioCtx.currentTime, 0.1);
   }
 
-  // Unlock audio on first touch/click
-  function unlockAudio() {
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-  }
-  window.addEventListener('click',     unlockAudio, { once: false });
-  window.addEventListener('touchstart',unlockAudio, { once: false });
+  window.addEventListener('click',      () => { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); });
+  window.addEventListener('touchstart', () => { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, { passive: true });
 
   /* ═══════════════════════════════════
      CURSOR COLOR
@@ -1097,8 +1098,7 @@
   ═══════════════════════════════════ */
   const sessionGlyph = document.getElementById('session-glyph');
   setInterval(() => {
-    const intensity = sessionIntensity();
-    const a = 0.04 + intensity * 0.18;
+    const a = 0.04 + sessionIntensity() * 0.18;
     sessionGlyph.style.color = `rgba(255,255,255,${a})`;
   }, 3000);
 
@@ -1114,13 +1114,10 @@
     updateDrawDiss();
 
     const energy = payEnergyBoost + Math.min(pointerSpeed / 80, 0.5);
-    for (const orb of orbs) {
-      orb.update(energy);
-      orb.draw(energy);
-    }
+    for (const orb of orbs) { orb.update(energy); orb.draw(energy); }
 
     updateSentence();
-    if (payState.alive) updatePayEntity();
+    updatePayEntity();
     updateCursorColor();
     reactAudio();
 
@@ -1132,14 +1129,10 @@
 })();
 </script>
 
-<!-- Paddle.js — loads Paddle overlay checkout -->
-<!-- Replace sandbox with production when ready -->
 <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <script>
-  // Initialize Paddle — replace with your actual Paddle seller/vendor ID
-  // For sandbox testing: Paddle.Environment.set('sandbox');
   if (typeof Paddle !== 'undefined') {
-    // Paddle.Environment.set('sandbox'); // uncomment for sandbox
+    // Paddle.Environment.set('sandbox'); // uncomment for sandbox testing
     Paddle.Initialize({ token: 'YOUR_PADDLE_CLIENT_SIDE_TOKEN' });
   }
 </script>
